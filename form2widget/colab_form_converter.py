@@ -29,8 +29,8 @@ import re
 import nbformat
 
 
-def convert_colab_to_widgets(nb_filename):
-    """Convert a Colab notebook form to ipywidgets for Voilà compatibility.
+def convert_to_widgets(nb_filename):
+    """Convert Colab notebook forms to ipywidgets for Voilà compatibility.
 
     Extracts form parameters from code cells, generates ipywidgets code, and
     embeds it into the notebook. Adds a markdown cell with a title if "@title"
