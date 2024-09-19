@@ -26,7 +26,13 @@ __all__ = [
 
 import ast
 import re
+import logging
+
 import nbformat
+
+# Configure logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 def convert_to_widgets(nb_filename):
@@ -172,7 +178,7 @@ def extract_parameters(source_code):
                 "allow-input": allow_input_match.group(1) == 'true'
                     if allow_input_match else False,
             }
-            print(f"form_params[{name}]:", form_params[name])
+            logger.debug(f"form_params[{name}]: {form_params[name]}")
         elif slider_match:
             form_params[name] = {
                 "type": "slider",
@@ -181,13 +187,13 @@ def extract_parameters(source_code):
                 "step": slider_match.group(3),
                 "value": value,
             }
-            print(f"form_params[{name}]:", form_params[name])
+            logger.debug(f"form_params[{name}]: {form_params[name]}")
         elif type_match:    # input box
             form_params[name] = {
                 "type": type_match.group(1),
                 "value": value,
             }
-            print(f"form_params[{name}]:", form_params[name])
+            logger.debug(f"form_params[{name}]: {form_params[name]}")
 
     return form_params
 
