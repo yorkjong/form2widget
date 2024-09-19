@@ -57,7 +57,7 @@ def create_input_dropdown(options, value, description,
 
     Returns:
         widget_box (HBox): An HBox containing the dropdown and an input box,
-            with a value property to get/set the dropdown value.
+        with a value property to get/set the dropdown value.
     """
     dropdown = widgets.Dropdown(
         options=options,

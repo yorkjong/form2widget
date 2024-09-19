@@ -136,9 +136,9 @@ def extract_and_comment_first_code_cell(nb_filename):
 
     Returns:
         nbformat.notebooknode.NotebookNode: The first code cell, or None if no
-            code cell is found. The returned cell is an instance of
-            NotebookNode, which behaves like a dictionary but is used by
-            nbformat to represent notebook elements.
+        code cell is found. The returned cell is an instance of NotebookNode,
+        which behaves like a dictionary but is used by nbformat to represent
+        notebook elements.
     """
     # Read the original notebook file
     with open(nb_filename, 'r', encoding='utf-8') as f:

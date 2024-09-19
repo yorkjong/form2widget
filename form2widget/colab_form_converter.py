@@ -10,12 +10,13 @@ The module parses Colab form parameters (annotated with `# @param` and
 accordingly.
 
 Usage:
-    Example usage to convert a Colab notebook to Voilà-compatible widgets:
 
-    ```python
+Example usage to convert a Colab notebook to Voilà-compatible widgets:
+::
+
     from colab_form_converter import convert_colab_to_widgets
     convert_colab_to_widgets('path_to_notebook.ipynb')
-    ```
+
 """
 __author__ = "York <york.jong@gmail.com>"
 __date__ = "2024/09/19 (initial version) ~ 2024/09/19 (last revision)"
@@ -127,7 +128,7 @@ def extract_parameters(source_code):
 
     Returns:
         dict: A dictionary of parameter names and their corresponding types,
-            options, and values.
+        options, and values.
     """
     assign_pat = re.compile(
         r'(?P<name>.+?)\s*=\s*(?P<value>.+?)\s*(#\s*@param.*)?$')
@@ -208,7 +209,7 @@ def generate_widgets(form_params, form_id=""):
 
     Returns:
         tuple: A tuple containing the widget code as a string and the update
-            code to extract values from the widgets.
+        code to extract values from the widgets.
     """
     widgets_code = f"form{form_id} = widgets.VBox([\n"
     for name, content in form_params.items():
