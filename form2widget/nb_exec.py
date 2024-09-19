@@ -1,5 +1,5 @@
 """
-Executing Notebook Cells
+Execute Jupyter Notebook Code Cells (nb_exec)
 
 This module provides functionality to execute Jupyter notebook code cells
 programmatically. It offers the ability to run code cells in a notebook,
