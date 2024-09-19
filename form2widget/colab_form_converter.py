@@ -21,7 +21,7 @@ __author__ = "York <york.jong@gmail.com>"
 __date__ = "2024/09/19 (initial version) ~ 2024/09/19 (last revision)"
 
 __all__ = [
-    'convert_colab_to_widgets',
+    'convert_to_widgets',
 ]
 
 import ast
