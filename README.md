@@ -1,4 +1,5 @@
-# form2widget
+# Read Me
+## Google Colab Forms into Jupyter Widgets Convert
 
 **form2widget** is a project designed to convert Google Colab Forms into `ipywidgets`, which are interactive widgets used in Jupyter notebooks. This tool facilitates the transformation of Colab Forms into `ipywidgets`, enhancing interactivity and usability within notebooks.
 
