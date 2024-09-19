@@ -1,5 +1,5 @@
-form2widget
-===========
+Source
+=======
 
 .. toctree::
    :maxdepth: 4
