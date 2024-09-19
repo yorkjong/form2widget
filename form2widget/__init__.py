@@ -19,8 +19,8 @@ __all__ = [
     'create_input_dropdown',
 ]
 
-from colab_form_converter import *
-from nb_op import *
-from nb_exec import *
-from input_dropdown import *
+from .colab_form_converter import *
+from .nb_op import *
+from .nb_exec import *
+from .input_dropdown import *
 
