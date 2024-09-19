@@ -1,0 +1,281 @@
+"""
+colab_form_converter - convert Google Colab notebook forms to ipywidgets
+
+This module provides functionality to extract form parameters from Colab
+notebooks and convert them into interactive ipywidgets that are compatible
+with Voilà, enabling easier deployment of Colab notebooks as web applications.
+
+The module parses Colab form parameters (annotated with `# @param` and
+`# @title`), generates corresponding ipywidgets code, and modifies the notebook
+accordingly.
+
+Usage:
+    Example usage to convert a Colab notebook to Voilà-compatible widgets:
+
+    ```python
+    from colab_form_converter import convert_colab_to_widgets
+    convert_colab_to_widgets('path_to_notebook.ipynb')
+    ```
+"""
+__author__ = "York <york.jong@gmail.com>"
+__date__ = "2024/09/19 (initial version) ~ 2024/09/19 (last revision)"
+
+__all__ = [
+    'convert_colab_to_widgets',
+]
+
+import ast
+import re
+import nbformat
+
+
+def convert_colab_to_widgets(nb_filename):
+    """Convert a Colab notebook form to ipywidgets for Voilà compatibility.
+
+    Extracts form parameters from code cells, generates ipywidgets code, and
+    embeds it into the notebook. Adds a markdown cell with a title if "@title"
+    is present.
+
+    Args:
+        nb_filename (str): The path to the notebook file.
+    """
+    # Read the original notebook file
+    with open(nb_filename, 'r', encoding='utf-8') as f:
+        notebook = nbformat.read(f, as_version=4)
+
+    new_cells = []
+    form_id = 0
+
+    for cell in notebook.cells:
+        if cell.cell_type != 'code':
+            # Preserve markdown cells
+            new_cells.append(cell)
+            continue
+
+        # Skip cells that don't contain Colab form parameters
+        if not re.search(r'.*=.*#\s*@param', cell.source):
+            new_cells.append(cell)
+            continue
+
+        form_id += 1
+
+        # Extract parameters from Colab form
+        form_params = extract_parameters(cell.source)
+
+        # Generate widgets code
+        widgets_code, update_code = generate_widgets(form_params, form_id)
+
+        # Remove lines related to Colab form parameters and title
+        lines = [line for line
+                 in cell.source.splitlines()
+                 if '@param' not in line and '@title' not in line]
+        remaining_code = '\n        '.join(lines)
+
+        # Extract global variables from the remaining code
+        global_vars = extract_global_vars('\n'.join(lines))
+        global_line = f"global {', '.join(global_vars)}" if global_vars else ""
+
+        # Combine widgets and remaining code into a new cell
+        updated_source = f"""
+import ipywidgets as widgets
+from IPython.display import display
+import pandas as pd
+from input_dropdown import *
+
+{widgets_code}
+submit_button{form_id} = widgets.Button(description="Submit")
+display(submit_button{form_id})
+voila_out{form_id} = widgets.Output()
+display(voila_out{form_id})
+
+def on_submit_clicked{form_id}(b):
+    # Get parameter values from widgets
+    {update_code}
+
+    # Execute the remaining code
+    with voila_out{form_id}:
+        voila_out{form_id}.clear_output()
+
+        # Global variables
+        {global_line}
+
+        {remaining_code}
+
+submit_button{form_id}.on_click(on_submit_clicked{form_id})
+"""
+        new_cells.append(nbformat.v4.new_code_cell(source=updated_source))
+
+    # Create a new notebook and write to the output file
+    new_notebook = nbformat.v4.new_notebook()
+    new_notebook.cells = new_cells
+    with open(nb_filename, 'w', encoding='utf-8') as f:
+        nbformat.write(new_notebook, f)
+
+
+def extract_parameters(source_code):
+    """
+    Extract parameters from Colab form annotations in the given code.
+
+    Args:
+        source_code (str): The code from which to extract parameters.
+
+    Returns:
+        dict: A dictionary of parameter names and their corresponding types,
+            options, and values.
+    """
+    assign_pat = re.compile(
+        r'(?P<name>.+?)\s*=\s*(?P<value>.+?)\s*(#\s*@param.*)?$')
+    options_pat = re.compile(r'#\s*@param\s*\[(.*)\]')
+    type_pat = re.compile(
+        r'#\s*@param.*\{\s*(?:type|"type")\s*:\s*"([^"]+)"\s*(?:,|})')
+    slider_pat = re.compile(
+        r'#\s*@param\s*\{\s*"type"\s*:\s*"slider"\s*,'
+        r'\s*"min"\s*:(.*),\s*"max"\s*:(.*),\s*"step"\s*:(.*)\}')
+    allow_input_pat = re.compile(
+        r'#\s*@param.*\{\s*'
+        r'(?:allow-input|"allow-input")\s*:\s*(true|false)\s*\}')
+
+    form_params = {}
+    for line in source_code.splitlines():
+        # Check if the line contains an '=' and '# @param'
+        assign_match = assign_pat.search(line)
+        if not assign_match:
+            continue
+
+        # Extract the variable name and value part
+        name = assign_match.group('name').strip()
+        value = assign_match.group('value').strip()
+        value = value.replace('"', "'")
+
+        # Replace leading and trailing single quotes with double quotes
+        value = re.sub(r"^'|'$", '"', value)
+
+        options_match = options_pat.search(line)
+        type_match = type_pat.search(line)
+        if not options_match:
+            slider_match = slider_pat.search(line)
+
+        if options_match:
+            allow_input_match = allow_input_pat.search(line)
+
+            options = [opt.strip() for opt in options_match.group(1).split(",")]
+            options = [opt.replace('"', "'") for opt in options]
+
+            # Replace leading and trailing single quotes with double quotes
+            options = [re.sub(r"^'|'$", '"', opt) for opt in options]
+
+            type_name = type_match.group(1) if type_match else "string"
+            form_params[name] = {
+                "type": type_name,
+                "options": options,
+                "value": value,
+                "allow-input": allow_input_match.group(1) == 'true'
+                    if allow_input_match else False,
+            }
+            print(f"form_params[{name}]:", form_params[name])
+        elif slider_match:
+            form_params[name] = {
+                "type": "slider",
+                "min": slider_match.group(1),
+                "max": slider_match.group(2),
+                "step": slider_match.group(3),
+                "value": value,
+            }
+            print(f"form_params[{name}]:", form_params[name])
+        elif type_match:    # input box
+            form_params[name] = {
+                "type": type_match.group(1),
+                "value": value,
+            }
+            print(f"form_params[{name}]:", form_params[name])
+
+    return form_params
+
+
+def generate_widgets(form_params, form_id=""):
+    """
+    Generate ipywidgets code from the extracted form parameters.
+
+    Args:
+        form_params (dict): The extracted form parameters.
+        form_id (int): The ID of the current form.
+
+    Returns:
+        tuple: A tuple containing the widget code as a string and the update
+            code to extract values from the widgets.
+    """
+    widgets_code = f"form{form_id} = widgets.VBox([\n"
+    for name, content in form_params.items():
+        value = content['value']
+        if "options" in content:
+            options = [f"{opt}" for opt in content['options']]
+            if content['type'] == 'raw':
+                options = [opt.strip('"').strip("'") for opt in options]
+            if value not in options:
+                value = options[0]
+            layout = "widgets.Layout(width='auto')"
+            params = (f"options=[{', '.join(options)}], value={value}, "
+                      f"description='{name}', layout={layout}")
+            widgets_kind = {
+                True: "create_input_dropdown",
+                False: "widgets.Dropdown",
+            }[content['allow-input']]
+        else:
+            if content['type'] == 'slider':
+                params = (f"min={content['min']}, max={content['max']}, "
+                        f"step={content['step']}, value={value}, "
+                        f"description='{name}'")
+            elif content['type'] == 'date':
+                params = f"value=pd.to_datetime({value}), description='{name}'"
+            elif content['type'] in (
+                    'string', 'raw', 'number', 'integer', 'boolean'):
+                params = f"value={value}, description='{name}'"
+            widgets_kind = {
+                'slider': "widgets.IntSlider",
+                'date': "widgets.DatePicker",
+                'string': "widgets.Text",
+                'raw': "widgets.Text",
+                'number': "widgets.FloatText",
+                'integer': "widgets.IntText",
+                'boolean': "widgets.Checkbox",
+            }[content['type']]
+        widgets_code += f"    {widgets_kind}({params}),\n"
+    widgets_code += f"])\ndisplay(form{form_id})\n"
+
+    update_code = "\n    ".join([f"{name} = form{form_id}.children[{i}].value"
+                                 for i, name in enumerate(form_params.keys())])
+
+    return widgets_code, update_code
+
+
+def extract_global_vars(code):
+    """
+    Extracts global variable names from a given block of Python code. This
+    function parses the code, identifies any variables declared as global or
+    assigned at the top level, and returns their names as a set.
+
+    Args:
+        code (str): A string containing Python code from which global variables
+                    should be extracted.
+
+    Returns:
+        set: A set of global variable names found in the provided code.
+    """
+    global_vars = set()
+
+    class GlobalVarVisitor(ast.NodeVisitor):
+        def visit_Global(self, node):
+            global_vars.update(node.names)
+
+    class AssignVisitor(ast.NodeVisitor):
+        def visit_Assign(self, node):
+            for target in node.targets:
+                if isinstance(target, ast.Name):
+                    global_vars.add(target.id)
+
+    tree = ast.parse(code)
+    GlobalVarVisitor().visit(tree)
+    AssignVisitor().visit(tree)
+
+    return global_vars
+
