@@ -20,9 +20,14 @@ __all__ = [
 ]
 
 import re
+import logging
 
 import nbformat
 from nbformat.corpus.words import generate_corpus_id as random_cell_id
+
+# Configure logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 def insert_title_cells(nb_filename):
@@ -67,7 +72,7 @@ def insert_title_cells(nb_filename):
             # Create and insert a markdown cell with the valid title
             if title_line:
                 title_markdown = f"#### {title_line}\n"
-                print(title_markdown)
+                logger.info(title_markdown)
                 md_cell = nbformat.v4.new_markdown_cell(source=title_markdown)
 
                 # Move the 'id' field from the top-level to the 'metadata' field
@@ -85,7 +90,7 @@ def insert_title_cells(nb_filename):
     notebook.cells = new_cells
 
     #n_changes, notebook = nbformat.validator.normalize(notebook)
-    #print(f"Normalized {n_changes} cells")
+    #logger.debug(f"Normalized {n_changes} cells")
     #nbformat.validator.validate(notebook)
 
     # Write the modified notebook back to the file
@@ -154,7 +159,7 @@ def extract_and_comment_first_code_cell(nb_filename):
         with open(nb_filename, 'w', encoding='utf-8') as f:
             nbformat.write(notebook, f)
     else:
-        print("No code cell found")
+        logger.error("No code cell found")
 
     return first_code_cell
 
