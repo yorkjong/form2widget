@@ -129,6 +129,29 @@ def extract_parameters(source_code):
     Returns:
         dict: A dictionary of parameter names and their corresponding types,
         options, and values.
+
+    Examples:
+        >>> extract_parameters('raw = ABC # @param {"type":"raw"}')
+        {'raw': {'type': 'raw', 'value': 'ABC'}}
+        >>> extract_parameters('string = "ABC" # @param {"type":"string"}')
+        {'string': {'type': 'string', 'value': '"ABC"'}}
+        >>> extract_parameters('num = 0 # @param {"type":"number"}')
+        {'num': {'type': 'number', 'value': '0'}}
+        >>> extract_parameters('integer = 0 # @param {"type":"integer"}')
+        {'integer': {'type': 'integer', 'value': '0'}}
+        >>> extract_parameters('date = "2024-09-19" # @param {"type":"date"}')
+        {'date': {'type': 'date', 'value': '"2024-09-19"'}}
+        >>> extract_parameters(
+        ... 'slider=2 # @param {"type":"slider","min":0,"max":9,"step":1}')
+        ...                         # doctest: +NORMALIZE_WHITESPACE
+        {'slider': {'type': 'slider', 'min': '0', 'max': '9', 'step': '1',
+                    'value': '2'}}
+        >>> extract_parameters(
+        ...     'stars = 5 # @param ["1","2","3","4","5"] {"type":"raw"}')
+        ...                         # doctest: +NORMALIZE_WHITESPACE
+        {'stars': {'type': 'raw',
+                   'options': ['"1"', '"2"', '"3"', '"4"', '"5"'],
+                   'value': '5', 'allow-input': False}}
     """
     assign_pat = re.compile(
         r'(?P<name>.+?)\s*=\s*(?P<value>.+?)\s*(#\s*@param.*)?$')
@@ -200,7 +223,7 @@ def extract_parameters(source_code):
 
 
 def generate_widgets(form_params, form_id=""):
-    """
+    r"""
     Generate ipywidgets code from the extracted form parameters.
 
     Args:
@@ -210,6 +233,14 @@ def generate_widgets(form_params, form_id=""):
     Returns:
         tuple: A tuple containing the widget code as a string and the update
         code to extract values from the widgets.
+
+    Examples:
+        >>> params = extract_parameters('raw = ABC # @param {"type":"raw"}')
+        >>> generate_widgets(params)
+        ...                         # doctest: +NORMALIZE_WHITESPACE
+        ("form = widgets.VBox([\n
+            widgets.Text(value=ABC, description='raw'),\n])\ndisplay(form)\n",
+        'raw = form.children[0].value')
     """
     widgets_code = f"form{form_id} = widgets.VBox([\n"
     for name, content in form_params.items():
@@ -286,3 +317,7 @@ def extract_global_vars(code):
 
     return global_vars
 
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
