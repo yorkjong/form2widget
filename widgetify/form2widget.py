@@ -1,5 +1,5 @@
 """
-form2widget - convert Google Colab notebook forms to Jupyter widgets
+form2widget - Google Colab notebook Forms to Jupyter Widgets converter
 
 This module provides functionality to extract form parameters from Colab
 notebooks and convert them into interactive ipywidgets that are compatible
@@ -14,8 +14,8 @@ Usage:
 Example usage to convert a Colab notebook to Voilà-compatible widgets:
 ::
 
-    from colab_form_converter import convert_colab_to_widgets
-    convert_colab_to_widgets('path_to_notebook.ipynb')
+    from form2widget import widgetify
+    widgetify('example_colab_forms.ipynb')
 
 """
 __author__ = "York <york.jong@gmail.com>"
