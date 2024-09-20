@@ -4,7 +4,7 @@ on:
     branches:
       - main
     paths:
-      - 'form2widget/**'
+      - 'widgetify/**'
       - 'docs/**'
 
 permissions:
