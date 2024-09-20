@@ -23,10 +23,10 @@ def get_version(rel_path):
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'form2widget'
+project = 'widgetify'
 copyright = '2024, York Jong'
 author = 'York Jong'
-release = get_version('../form2widget/__init__.py')
+release = get_version('../widgetify/__init__.py')
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

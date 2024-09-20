@@ -15,12 +15,12 @@ def get_version(rel_path):
 
 
 setup(
-    name = 'form2widget',
-    version = get_version('form2widget/__init__.py'),
+    name = 'widgetify',
+    version = get_version('widgetify/__init__.py'),
     license = 'MIT',
     author = 'York Jong',
     author_email = 'york.jong@gmail.com',
-    description = 'Google Colab Forms into `ipywidgets` Converter',
+    description = 'Google Colab Forms into Jupyter Widgets Converter',
     long_description = open('README.md').read(),
     python_requires = '>=3.6',
     packages = find_packages(),
