@@ -19,10 +19,10 @@ Example usage to convert a Colab notebook to Voilà-compatible widgets:
 
 """
 __author__ = "York <york.jong@gmail.com>"
-__date__ = "2024/09/19 (initial version) ~ 2024/09/19 (last revision)"
+__date__ = "2024/09/19 (initial version) ~ 2024/09/20 (last revision)"
 
 __all__ = [
-    'convert_to_widgets',
+    'widgetify',
 ]
 
 import ast
