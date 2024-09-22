@@ -9,7 +9,7 @@
 - **Form Conversion:** Convert Google Colab Forms into `ipywidgets`.
 - **Customizable Widgets:** Create and customize interactive widgets using `ipywidgets`.
 - **Compatibility:** Seamlessly integrates with Jupyter notebooks and the `ipywidgets` library.
-- **Demo Notebook:** Explore the example notebook [widgetify_demo.ipynb(https://github.com/yorkjong/widgetify/blob/main/notebooks/widgetify_demo.ipynb), which demonstrates how to use **widgetify** to run Google Colab notebooks on Voilà and publish them using ngrok.
+- **Demo Notebook:** Explore the example notebook [widgetify_demo.ipynb](https://github.com/yorkjong/widgetify/blob/main/notebooks/widgetify_demo.ipynb), which demonstrates how to use **widgetify** to run Google Colab notebooks on Voilà and publish them using ngrok.
 
 ## Getting Started
 
