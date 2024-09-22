@@ -16,10 +16,9 @@ Example usage to convert a Colab notebook to Voilà-compatible widgets:
 
     from form2widget import widgetify
     widgetify('example_colab_forms.ipynb')
-
 """
 __author__ = "York <york.jong@gmail.com>"
-__date__ = "2024/09/19 (initial version) ~ 2024/09/20 (last revision)"
+__date__ = "2024/09/19 (initial version) ~ 2024/09/22 (last revision)"
 
 __all__ = [
     'widgetify',
@@ -265,8 +264,10 @@ def generate_widgets(form_params, form_id=""):
                         f"description='{name}'")
             elif content['type'] == 'date':
                 params = f"value=pd.to_datetime({value}), description='{name}'"
+            elif content['type'] == 'raw':
+                params = f"value=str({value}), description='{name}'"
             elif content['type'] in (
-                    'string', 'raw', 'number', 'integer', 'boolean'):
+                    'string', 'number', 'integer', 'boolean'):
                 params = f"value={value}, description='{name}'"
             widgets_kind = {
                 'slider': "widgets.IntSlider",
