@@ -87,7 +87,7 @@ def widgetify(nb_filename):
 import ipywidgets as widgets
 from IPython.display import display
 import pandas as pd
-from input_dropdown import *
+from widgetify import input_dropdown
 
 {widgets_code}
 submit_button{form_id} = widgets.Button(description="Submit")
