@@ -2,9 +2,9 @@
 Initialize widgetify package.
 """
 __software__ = "Google Colab Forms into `ipywidgets` Converter"
-__version__ = "0.0.2"
+__version__ = "1.0"
 __author__ = "York <york.jong@gmail.com>"
-__date__ = "2024/09/19 (initial version) ~ 2024/09/20 (last revision)"
+__date__ = "2024/09/19 (initial version) ~ 2024/09/22 (last revision)"
 
 __all__ = [
     'widgetify',
