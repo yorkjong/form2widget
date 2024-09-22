@@ -71,7 +71,7 @@ def insert_title_cells(nb_filename):
 
             # Create and insert a markdown cell with the valid title
             if title_line:
-                title_markdown = f"#### {title_line}\n"
+                title_markdown = f"#### {title_line}"
                 logger.info(title_markdown)
                 md_cell = nbformat.v4.new_markdown_cell(source=title_markdown)
 
