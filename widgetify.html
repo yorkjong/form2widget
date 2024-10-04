@@ -49,11 +49,33 @@
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">Source</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">widgetify package</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#widgetify-form2widget-module">widgetify.form2widget module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#widgetify-input-dropdown-module">widgetify.input_dropdown module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#widgetify-nb-exec-module">widgetify.nb_exec module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#widgetify-nb-op-module">widgetify.nb_op module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-contents">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-widgetify.form2widget">widgetify.form2widget module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#widgetify.form2widget.widgetify"><code class="docutils literal notranslate"><span class="pre">widgetify()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-widgetify.input_dropdown">widgetify.input_dropdown module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#widgetify.input_dropdown.create_input_dropdown"><code class="docutils literal notranslate"><span class="pre">create_input_dropdown()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-widgetify.nb_exec">widgetify.nb_exec module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#widgetify.nb_exec.run_code_cell"><code class="docutils literal notranslate"><span class="pre">run_code_cell()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#widgetify.nb_exec.run_code_cells"><code class="docutils literal notranslate"><span class="pre">run_code_cells()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-widgetify.nb_op">widgetify.nb_op module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#widgetify.nb_op.extract_and_comment_first_code_cell"><code class="docutils literal notranslate"><span class="pre">extract_and_comment_first_code_cell()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#widgetify.nb_op.extract_section"><code class="docutils literal notranslate"><span class="pre">extract_section()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#widgetify.nb_op.insert_title_cells"><code class="docutils literal notranslate"><span class="pre">insert_title_cells()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#widgetify.nb_op.remove_open_in_colab_cell"><code class="docutils literal notranslate"><span class="pre">remove_open_in_colab_cell()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#widgetify.nb_op.remove_section"><code class="docutils literal notranslate"><span class="pre">remove_section()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#widgetify.nb_op.search_section"><code class="docutils literal notranslate"><span class="pre">search_section()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-widgetify">Module contents</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#widgetify.create_input_dropdown"><code class="docutils literal notranslate"><span class="pre">create_input_dropdown()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#widgetify.widgetify"><code class="docutils literal notranslate"><span class="pre">widgetify()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -90,20 +112,357 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 </section>
-<section id="widgetify-form2widget-module">
-<h2>widgetify.form2widget module<a class="headerlink" href="#widgetify-form2widget-module" title="Link to this heading"></a></h2>
+<section id="module-widgetify.form2widget">
+<span id="widgetify-form2widget-module"></span><h2>widgetify.form2widget module<a class="headerlink" href="#module-widgetify.form2widget" title="Link to this heading"></a></h2>
+<p>form2widget - Google Colab notebook Forms to Jupyter Widgets converter</p>
+<p>This module provides functionality to extract form parameters from Colab
+notebooks and convert them into interactive ipywidgets that are compatible
+with Voilà, enabling easier deployment of Colab notebooks as web applications.</p>
+<p>The module parses Colab form parameters (annotated with <cite># &#64;param</cite> and
+<cite># &#64;title</cite>), generates corresponding ipywidgets code, and modifies the notebook
+accordingly.</p>
+<p>Usage:</p>
+<p>Example usage to convert a Colab notebook to Voilà-compatible widgets:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">form2widget</span> <span class="kn">import</span> <span class="n">widgetify</span>
+<span class="n">widgetify</span><span class="p">(</span><span class="s1">&#39;example_colab_forms.ipynb&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="widgetify.form2widget.widgetify">
+<span class="sig-prename descclassname"><span class="pre">widgetify.form2widget.</span></span><span class="sig-name descname"><span class="pre">widgetify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nb_filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/widgetify/form2widget.html#widgetify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#widgetify.form2widget.widgetify" title="Link to this definition"></a></dt>
+<dd><p>Convert Colab Forms to Jupyter Widgets for Voilà compatibility.</p>
+<p>Extracts form parameters from code cells, generates ipywidgets code, and
+embeds it into the notebook. Adds a markdown cell with a title if “&#64;title”
+is present.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>nb_filename</strong> (<em>str</em>) – The path to the notebook file.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
-<section id="widgetify-input-dropdown-module">
-<h2>widgetify.input_dropdown module<a class="headerlink" href="#widgetify-input-dropdown-module" title="Link to this heading"></a></h2>
+<section id="module-widgetify.input_dropdown">
+<span id="widgetify-input-dropdown-module"></span><h2>widgetify.input_dropdown module<a class="headerlink" href="#module-widgetify.input_dropdown" title="Link to this heading"></a></h2>
+<p>input_dropbox - Creating Jupyter Widgets with user input capability.</p>
+<p>This module provides a function <cite>create_input_dropdown</cite> to create an
+interactive Jupyter Widget that mimics the behavior of a Colab Form dropdown
+with user input enabled. The widget includes both a dropdown menu and an input
+box, allowing users to select from a list of options or type their own input,
+which is reflected in both the dropdown and the input box.</p>
+<dl class="simple">
+<dt>Usage:</dt><dd><p>Import this module and call <cite>create_input_dropdown</cite> to generate a widget
+box with a dropdown and input field suitable for Jupyter environments.</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">input_dropbox</span> <span class="k">as</span> <span class="nn">idb</span>
+
+<span class="c1"># Define options and initial value</span>
+<span class="n">options</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Option 1&#39;</span><span class="p">,</span> <span class="s1">&#39;Option 2&#39;</span><span class="p">,</span> <span class="s1">&#39;Option 3&#39;</span><span class="p">]</span>
+<span class="n">initial_value</span> <span class="o">=</span> <span class="s1">&#39;Option 1&#39;</span>
+<span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;Select an option:&#39;</span>
+
+<span class="c1"># Create the widget</span>
+<span class="n">dropdown</span> <span class="o">=</span> <span class="n">idb</span><span class="o">.</span><span class="n">create_input_dropdown</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">initial_value</span><span class="p">,</span> <span class="n">description</span><span class="p">)</span>
+
+<span class="c1"># Display the widget</span>
+<span class="n">display</span><span class="p">(</span><span class="n">dropdown</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">dropdown</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="widgetify.input_dropdown.create_input_dropdown">
+<span class="sig-prename descclassname"><span class="pre">widgetify.input_dropdown.</span></span><span class="sig-name descname"><span class="pre">create_input_dropdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Layout(width='auto')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/widgetify/input_dropdown.html#create_input_dropdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#widgetify.input_dropdown.create_input_dropdown" title="Link to this definition"></a></dt>
+<dd><p>Create a dropdown widget that allows user input, mimicking a Colab Form
+dropdown with the <cite>{“allow-input”: true}</cite> setting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>options</strong> (<em>list</em>) – A list of options to be displayed in the dropdown.</p></li>
+<li><p><strong>value</strong> (<em>str</em>) – The initial value of the dropdown, which should be one of
+the options.</p></li>
+<li><p><strong>description</strong> (<em>str</em>) – The description (label) to be displayed next to the
+dropdown.</p></li>
+<li><p><strong>layout</strong> (<em>widgets.Layout</em><em>, </em><em>optional</em>) – A layout object to control the size
+and appearance of the dropdown and input box. Default is a layout
+with width set to ‘auto’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An HBox containing the dropdown and an input box,
+with a value property to get/set the dropdown value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>widget_box (HBox)</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
-<section id="widgetify-nb-exec-module">
-<h2>widgetify.nb_exec module<a class="headerlink" href="#widgetify-nb-exec-module" title="Link to this heading"></a></h2>
+<section id="module-widgetify.nb_exec">
+<span id="widgetify-nb-exec-module"></span><h2>widgetify.nb_exec module<a class="headerlink" href="#module-widgetify.nb_exec" title="Link to this heading"></a></h2>
+<p>Execute Jupyter Notebook Code Cells (nb_exec)</p>
+<p>This module provides functionality to execute Jupyter notebook code cells
+programmatically. It offers the ability to run code cells in a notebook,
+handling shell commands, IPython magic commands, and standard Python code.</p>
+<dl class="simple">
+<dt>Usage:</dt><dd><p>The module is intended to work with Jupyter notebooks, allowing for the
+programmatic execution of code cells, either individually or in batches.</p>
+</dd>
+</dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="widgetify.nb_exec.run_code_cell">
+<span class="sig-prename descclassname"><span class="pre">widgetify.nb_exec.</span></span><span class="sig-name descname"><span class="pre">run_code_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/widgetify/nb_exec.html#run_code_cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#widgetify.nb_exec.run_code_cell" title="Link to this definition"></a></dt>
+<dd><p>Executes a Jupyter notebook code cell, handling Python, shell, and magic
+commands.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cell</strong> (<em>nbformat.NotebookNode</em>) – A notebook cell object, typically from</p></li>
+<li><p><strong>with</strong> (<em>a Jupyter notebook. The function only processes cells</em>)</p></li>
+<li><p><strong>'code'.</strong> (<em>cell_type set to</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The function executes the cell in the current environment, but
+does not return any output.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="widgetify.nb_exec.run_code_cells">
+<span class="sig-prename descclassname"><span class="pre">widgetify.nb_exec.</span></span><span class="sig-name descname"><span class="pre">run_code_cells</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cells</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/widgetify/nb_exec.html#run_code_cells"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#widgetify.nb_exec.run_code_cells" title="Link to this definition"></a></dt>
+<dd><p>Execute a list of Jupyter code cells.</p>
+<p>This function iterates over a list of Jupyter notebook cells and executes
+any cell with the type <cite>‘code’</cite>. Non-code cells (e.g., markdown or raw)
+are ignored.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cells</strong> (<em>list</em><em> of </em><em>nbformat.NotebookNode</em>) – A list of Jupyter notebook cell</p></li>
+<li><p><strong>cell_type</strong> (<em>objects. The function will execute only the cells where</em>)</p></li>
+<li><p><strong>'code'.</strong> (<em>is</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The function executes the code in the cells in the current
+environment but does not return any output.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
-<section id="widgetify-nb-op-module">
-<h2>widgetify.nb_op module<a class="headerlink" href="#widgetify-nb-op-module" title="Link to this heading"></a></h2>
+<section id="module-widgetify.nb_op">
+<span id="widgetify-nb-op-module"></span><h2>widgetify.nb_op module<a class="headerlink" href="#module-widgetify.nb_op" title="Link to this heading"></a></h2>
+<p>Notebook Operations (nb_op)</p>
+<p>This module provides utilities for performing common operations on Jupyter
+Notebooks using <cite>nbformat</cite>, such as inserting titles, removing sections,
+commenting code cells, and more. It is designed to automate notebook
+modifications like inserting markdown titles, removing specific sections, and
+handling Colab-specific cells.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="widgetify.nb_op.extract_and_comment_first_code_cell">
+<span class="sig-prename descclassname"><span class="pre">widgetify.nb_op.</span></span><span class="sig-name descname"><span class="pre">extract_and_comment_first_code_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nb_filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/widgetify/nb_op.html#extract_and_comment_first_code_cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#widgetify.nb_op.extract_and_comment_first_code_cell" title="Link to this definition"></a></dt>
+<dd><p>Extracts the first code cell from a Jupyter Notebook file, comments out
+its content, and writes the modified notebook back to the file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>nb_filename</strong> (<em>str</em>) – The path to the notebook file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The first code cell, or None if no
+code cell is found. The returned cell is an instance of NotebookNode,
+which behaves like a dictionary but is used by nbformat to represent
+notebook elements.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nbformat.notebooknode.NotebookNode</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="widgetify.nb_op.extract_section">
+<span class="sig-prename descclassname"><span class="pre">widgetify.nb_op.</span></span><span class="sig-name descname"><span class="pre">extract_section</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nb_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">markdown_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/widgetify/nb_op.html#extract_section"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#widgetify.nb_op.extract_section" title="Link to this definition"></a></dt>
+<dd><p>Extract a specific section and its content from a Jupyter Notebook.</p>
+<p>This function searches for a section within the notebook based on the
+provided section name (heading) and extracts the cells that belong to
+that section. The extraction starts from the specified section and
+includes all subsequent cells until a heading of the same or higher level
+is encountered.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nb_filename</strong> (<em>str</em>) – The path to the Jupyter Notebook file.</p></li>
+<li><p><strong>section_name</strong> (<em>str</em>) – The name of the section to extract, including the
+heading level (e.g., ‘## Section Name’).</p></li>
+<li><p><strong>markdown_only</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, only markdown cells will be
+considered for extraction. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of <cite>nbformat.NotebookNode</cite> objects, representing the
+extracted cells belonging to the specified section. If the section
+is not found, an empty list is returned.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The function matches the <cite>section_name</cite> exactly, including the
+heading level (indicated by ‘#’). The extraction stops when it
+encounters a heading of the same or higher level than the given
+section’s heading.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="widgetify.nb_op.insert_title_cells">
+<span class="sig-prename descclassname"><span class="pre">widgetify.nb_op.</span></span><span class="sig-name descname"><span class="pre">insert_title_cells</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nb_filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/widgetify/nb_op.html#insert_title_cells"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#widgetify.nb_op.insert_title_cells" title="Link to this definition"></a></dt>
+<dd><p>Insert a markdown title cell above each Colab Form or widgets cell.</p>
+<p>The title cell is created with a level 4 heading (####) and the title
+extracted from the Colab Form’s <a class="reference external" href="mailto:'&#37;&#52;&#48;title">‘<span>&#64;</span>title</a>’ annotation. The title cell is added
+above any code  cell that contains Colab Form parameters or ipywidgets
+display calls.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>nb_filename</strong> (<em>str</em>) – The path to the notebook file to modify.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="widgetify.nb_op.remove_open_in_colab_cell">
+<span class="sig-prename descclassname"><span class="pre">widgetify.nb_op.</span></span><span class="sig-name descname"><span class="pre">remove_open_in_colab_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nb_filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/widgetify/nb_op.html#remove_open_in_colab_cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#widgetify.nb_op.remove_open_in_colab_cell" title="Link to this definition"></a></dt>
+<dd><p>Remove the open-in-colab cell from a Jupyter notebook.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>nb_filename</strong> (<em>str</em>) – The path to the notebook file to modify.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="widgetify.nb_op.remove_section">
+<span class="sig-prename descclassname"><span class="pre">widgetify.nb_op.</span></span><span class="sig-name descname"><span class="pre">remove_section</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nb_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">markdown_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/widgetify/nb_op.html#remove_section"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#widgetify.nb_op.remove_section" title="Link to this definition"></a></dt>
+<dd><p>Remove a specific section and its content from a Jupyter Notebook.</p>
+<p>This function removes a section and all its subsequent cells from the
+notebook, starting from the specified section until it encounters a
+heading of the same or higher level.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nb_filename</strong> (<em>str</em>) – The path to the Jupyter Notebook file.</p></li>
+<li><p><strong>section_name</strong> (<em>str</em>) – The name of the section to remove, including the
+heading level (e.g., ‘## Section Name’).</p></li>
+<li><p><strong>markdwn_only</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, only markdown cells will be
+considered for extraction. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The function modifies the notebook in place and writes the
+changes back to the file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The section is identified by its exact heading (including the level
+of ‘#’). Once a matching section is found, the removal will continue
+until a markdown heading of the same or higher level is encountered.
+The rest of the notebook content will remain unchanged.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="widgetify.nb_op.search_section">
+<span class="sig-prename descclassname"><span class="pre">widgetify.nb_op.</span></span><span class="sig-name descname"><span class="pre">search_section</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nb_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/widgetify/nb_op.html#search_section"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#widgetify.nb_op.search_section" title="Link to this definition"></a></dt>
+<dd><p>Search for a markdown section in a Jupyter Notebook file containing
+the specified text.</p>
+<p>The function searches through the markdown cells in the notebook for a
+heading that includes the given text. If a match is found, the full line
+containing the heading is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nb_filename</strong> (<em>str</em>) – The path to the notebook file.</p></li>
+<li><p><strong>text</strong> (<em>str</em>) – The text to search for within the markdown headings.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The full line of the heading that contains the search text, or
+None if no matching heading is found.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The function searches only in markdown cells and checks if the line
+starts with a heading marker (e.g., ‘#’, ‘##’).</p>
+</div>
+</dd></dl>
+
 </section>
-<section id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<section id="module-widgetify">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-widgetify" title="Link to this heading"></a></h2>
+<p>Initialize widgetify package.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="widgetify.create_input_dropdown">
+<span class="sig-prename descclassname"><span class="pre">widgetify.</span></span><span class="sig-name descname"><span class="pre">create_input_dropdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Layout(width='auto')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/widgetify/input_dropdown.html#create_input_dropdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#widgetify.create_input_dropdown" title="Link to this definition"></a></dt>
+<dd><p>Create a dropdown widget that allows user input, mimicking a Colab Form
+dropdown with the <cite>{“allow-input”: true}</cite> setting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>options</strong> (<em>list</em>) – A list of options to be displayed in the dropdown.</p></li>
+<li><p><strong>value</strong> (<em>str</em>) – The initial value of the dropdown, which should be one of
+the options.</p></li>
+<li><p><strong>description</strong> (<em>str</em>) – The description (label) to be displayed next to the
+dropdown.</p></li>
+<li><p><strong>layout</strong> (<em>widgets.Layout</em><em>, </em><em>optional</em>) – A layout object to control the size
+and appearance of the dropdown and input box. Default is a layout
+with width set to ‘auto’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An HBox containing the dropdown and an input box,
+with a value property to get/set the dropdown value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>widget_box (HBox)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="widgetify.widgetify">
+<span class="sig-prename descclassname"><span class="pre">widgetify.</span></span><span class="sig-name descname"><span class="pre">widgetify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nb_filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/widgetify/form2widget.html#widgetify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#widgetify.widgetify" title="Link to this definition"></a></dt>
+<dd><p>Convert Colab Forms to Jupyter Widgets for Voilà compatibility.</p>
+<p>Extracts form parameters from code cells, generates ipywidgets code, and
+embeds it into the notebook. Adds a markdown cell with a title if “&#64;title”
+is present.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>nb_filename</strong> (<em>str</em>) – The path to the notebook file.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 </section>
 

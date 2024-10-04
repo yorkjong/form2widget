@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>widgetify.nb_op &mdash; widgetify 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=f2a433a1"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            widgetify
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">Read Me</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Source</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">widgetify</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">widgetify.nb_op</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for widgetify.nb_op</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Notebook Operations (nb_op)</span>
+
+<span class="sd">This module provides utilities for performing common operations on Jupyter</span>
+<span class="sd">Notebooks using `nbformat`, such as inserting titles, removing sections,</span>
+<span class="sd">commenting code cells, and more. It is designed to automate notebook</span>
+<span class="sd">modifications like inserting markdown titles, removing specific sections, and</span>
+<span class="sd">handling Colab-specific cells.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;York &lt;york.jong@gmail.com&gt;&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;2024/09/19 (initial version) ~ 2024/09/19 (last revision)&quot;</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;insert_title_cells&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;remove_open_in_colab_cell&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;extract_and_comment_first_code_cell&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;search_section&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;extract_section&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;remove_section&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">nbformat</span>
+<span class="kn">from</span> <span class="nn">nbformat.corpus.words</span> <span class="kn">import</span> <span class="n">generate_corpus_id</span> <span class="k">as</span> <span class="n">random_cell_id</span>
+
+<span class="c1"># Configure logging</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="insert_title_cells">
+<a class="viewcode-back" href="../../widgetify.html#widgetify.nb_op.insert_title_cells">[docs]</a>
+<span class="k">def</span> <span class="nf">insert_title_cells</span><span class="p">(</span><span class="n">nb_filename</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Insert a markdown title cell above each Colab Form or widgets cell.</span>
+
+<span class="sd">    The title cell is created with a level 4 heading (####) and the title</span>
+<span class="sd">    extracted from the Colab Form&#39;s &#39;@title&#39; annotation. The title cell is added</span>
+<span class="sd">    above any code  cell that contains Colab Form parameters or ipywidgets</span>
+<span class="sd">    display calls.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        nb_filename (str): The path to the notebook file to modify.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Read the original notebook file</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">nb_filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">notebook</span> <span class="o">=</span> <span class="n">nbformat</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">as_version</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+    <span class="n">new_cells</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">notebook</span><span class="o">.</span><span class="n">cells</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cell</span><span class="o">.</span><span class="n">cell_type</span> <span class="o">==</span> <span class="s1">&#39;code&#39;</span><span class="p">:</span>
+            <span class="c1"># Initialize an empty string for the title line</span>
+            <span class="n">title_line</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+            <span class="c1"># Check if the cell contains Colab Form or ipywidgets code</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.*=.*#\s*@param&#39;</span><span class="p">,</span> <span class="n">cell</span><span class="o">.</span><span class="n">source</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="nb">all</span><span class="p">(</span><span class="n">keyword</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">source</span>
+                    <span class="k">for</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;ipywidgets&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">display(&#39;</span><span class="p">])):</span>
+
+                <span class="c1"># Extract the title from the @title annotation</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="s1">&#39;@title&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                        <span class="n">title_line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;@title&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                        <span class="n">title_line</span> <span class="o">=</span> <span class="n">title_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;{&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                        <span class="k">break</span>
+
+            <span class="c1"># If the title line is just &#39;_&#39;, set it to an empty string</span>
+            <span class="k">if</span> <span class="n">title_line</span> <span class="o">==</span> <span class="s1">&#39;_&#39;</span><span class="p">:</span>
+                <span class="n">title_line</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+            <span class="c1"># Create and insert a markdown cell with the valid title</span>
+            <span class="k">if</span> <span class="n">title_line</span><span class="p">:</span>
+                <span class="n">title_markdown</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;#### </span><span class="si">{</span><span class="n">title_line</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">title_markdown</span><span class="p">)</span>
+                <span class="n">md_cell</span> <span class="o">=</span> <span class="n">nbformat</span><span class="o">.</span><span class="n">v4</span><span class="o">.</span><span class="n">new_markdown_cell</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">title_markdown</span><span class="p">)</span>
+
+                <span class="c1"># Move the &#39;id&#39; field from the top-level to the &#39;metadata&#39; field</span>
+                <span class="c1"># This is done to match the format used by Colab, where &#39;id&#39; is</span>
+                <span class="c1"># placed in &#39;metadata&#39;</span>
+                <span class="n">md_cell</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">md_cell</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+                <span class="k">del</span> <span class="n">md_cell</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+
+                <span class="n">new_cells</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">md_cell</span><span class="p">)</span>
+
+        <span class="c1"># Add all cells (including the newly inserted markdown cells)</span>
+        <span class="n">new_cells</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+
+    <span class="c1"># Update the notebook with the new cells</span>
+    <span class="n">notebook</span><span class="o">.</span><span class="n">cells</span> <span class="o">=</span> <span class="n">new_cells</span>
+
+    <span class="c1">#n_changes, notebook = nbformat.validator.normalize(notebook)</span>
+    <span class="c1">#logger.debug(f&quot;Normalized {n_changes} cells&quot;)</span>
+    <span class="c1">#nbformat.validator.validate(notebook)</span>
+
+    <span class="c1"># Write the modified notebook back to the file</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">nb_filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">nbformat</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">notebook</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="remove_open_in_colab_cell">
+<a class="viewcode-back" href="../../widgetify.html#widgetify.nb_op.remove_open_in_colab_cell">[docs]</a>
+<span class="k">def</span> <span class="nf">remove_open_in_colab_cell</span><span class="p">(</span><span class="n">nb_filename</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove the open-in-colab cell from a Jupyter notebook.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        nb_filename (str): The path to the notebook file to modify.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Read the original notebook file</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">nb_filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">notebook</span> <span class="o">=</span> <span class="n">nbformat</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">as_version</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+    <span class="n">new_cells</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">notebook</span><span class="o">.</span><span class="n">cells</span><span class="p">:</span>
+        <span class="c1"># Check if the cell is a markdown cell with specific content to remove</span>
+        <span class="k">if</span> <span class="n">cell</span><span class="o">.</span><span class="n">cell_type</span> <span class="o">==</span> <span class="s1">&#39;markdown&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;alt=</span><span class="se">\&quot;</span><span class="s1">Open In Colab</span><span class="se">\&quot;</span><span class="s1">&#39;</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">source</span><span class="p">:</span>
+                <span class="k">continue</span>  <span class="c1"># Skip this cell</span>
+
+        <span class="c1"># Add all other cells to the new list</span>
+        <span class="n">new_cells</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+
+    <span class="c1"># Update the notebook with the remaining cells</span>
+    <span class="n">notebook</span><span class="o">.</span><span class="n">cells</span> <span class="o">=</span> <span class="n">new_cells</span>
+
+    <span class="c1"># Write the modified notebook to the output file</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">nb_filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">nbformat</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">notebook</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="extract_and_comment_first_code_cell">
+<a class="viewcode-back" href="../../widgetify.html#widgetify.nb_op.extract_and_comment_first_code_cell">[docs]</a>
+<span class="k">def</span> <span class="nf">extract_and_comment_first_code_cell</span><span class="p">(</span><span class="n">nb_filename</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extracts the first code cell from a Jupyter Notebook file, comments out</span>
+<span class="sd">    its content, and writes the modified notebook back to the file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        nb_filename (str): The path to the notebook file.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        nbformat.notebooknode.NotebookNode: The first code cell, or None if no</span>
+<span class="sd">        code cell is found. The returned cell is an instance of NotebookNode,</span>
+<span class="sd">        which behaves like a dictionary but is used by nbformat to represent</span>
+<span class="sd">        notebook elements.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Read the original notebook file</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">nb_filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">notebook</span> <span class="o">=</span> <span class="n">nbformat</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">as_version</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+    <span class="c1"># Find the first code cell</span>
+    <span class="n">first_code_cell</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">notebook</span><span class="o">.</span><span class="n">cells</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cell</span><span class="o">.</span><span class="n">cell_type</span> <span class="o">==</span> <span class="s1">&#39;code&#39;</span><span class="p">:</span>
+            <span class="n">first_code_cell</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="c1"># Comment out the first block of code</span>
+            <span class="n">cell</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;# </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">line</span>
+                                     <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()])</span>
+            <span class="k">break</span>
+
+    <span class="c1"># Save the modified notebook</span>
+    <span class="k">if</span> <span class="n">first_code_cell</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">nb_filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">nbformat</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">notebook</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No code cell found&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">first_code_cell</span></div>
+
+
+
+<div class="viewcode-block" id="search_section">
+<a class="viewcode-back" href="../../widgetify.html#widgetify.nb_op.search_section">[docs]</a>
+<span class="k">def</span> <span class="nf">search_section</span><span class="p">(</span><span class="n">nb_filename</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Search for a markdown section in a Jupyter Notebook file containing</span>
+<span class="sd">    the specified text.</span>
+
+<span class="sd">    The function searches through the markdown cells in the notebook for a</span>
+<span class="sd">    heading that includes the given text. If a match is found, the full line</span>
+<span class="sd">    containing the heading is returned.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        nb_filename (str): The path to the notebook file.</span>
+<span class="sd">        text (str): The text to search for within the markdown headings.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: The full line of the heading that contains the search text, or</span>
+<span class="sd">        None if no matching heading is found.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The function searches only in markdown cells and checks if the line</span>
+<span class="sd">        starts with a heading marker (e.g., &#39;#&#39;, &#39;##&#39;).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Read the original notebook file</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">nb_filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">notebook</span> <span class="o">=</span> <span class="n">nbformat</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">as_version</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">notebook</span><span class="o">.</span><span class="n">cells</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cell</span><span class="o">.</span><span class="n">cell_type</span> <span class="o">==</span> <span class="s1">&#39;markdown&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">line</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="extract_section">
+<a class="viewcode-back" href="../../widgetify.html#widgetify.nb_op.extract_section">[docs]</a>
+<span class="k">def</span> <span class="nf">extract_section</span><span class="p">(</span><span class="n">nb_filename</span><span class="p">,</span> <span class="n">section_name</span><span class="p">,</span> <span class="n">markdown_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract a specific section and its content from a Jupyter Notebook.</span>
+
+<span class="sd">    This function searches for a section within the notebook based on the</span>
+<span class="sd">    provided section name (heading) and extracts the cells that belong to</span>
+<span class="sd">    that section. The extraction starts from the specified section and</span>
+<span class="sd">    includes all subsequent cells until a heading of the same or higher level</span>
+<span class="sd">    is encountered.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        nb_filename (str): The path to the Jupyter Notebook file.</span>
+<span class="sd">        section_name (str): The name of the section to extract, including the</span>
+<span class="sd">            heading level (e.g., &#39;## Section Name&#39;).</span>
+<span class="sd">        markdown_only (bool, optional): If True, only markdown cells will be</span>
+<span class="sd">            considered for extraction. Defaults to False.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: A list of `nbformat.NotebookNode` objects, representing the</span>
+<span class="sd">        extracted cells belonging to the specified section. If the section</span>
+<span class="sd">        is not found, an empty list is returned.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The function matches the `section_name` exactly, including the</span>
+<span class="sd">        heading level (indicated by &#39;#&#39;). The extraction stops when it</span>
+<span class="sd">        encounters a heading of the same or higher level than the given</span>
+<span class="sd">        section&#39;s heading.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Read the original notebook file</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">nb_filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">notebook</span> <span class="o">=</span> <span class="n">nbformat</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">as_version</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+    <span class="c1"># Calculate the section level from the section name</span>
+    <span class="n">section_level</span> <span class="o">=</span> <span class="n">section_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)</span>
+
+    <span class="n">extract_cells</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">extract_mode</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">start_extract</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">notebook</span><span class="o">.</span><span class="n">cells</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cell</span><span class="o">.</span><span class="n">cell_type</span> <span class="o">==</span> <span class="s1">&#39;markdown&#39;</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+            <span class="c1"># Calculate the heading level of the current markdown cell</span>
+            <span class="n">heading_level</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span>
+                 <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)),</span>
+                <span class="kc">None</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Detect if the cell matches the section to start extracting</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">start_extract</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">section_name</span> <span class="ow">in</span> <span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">):</span>
+                    <span class="n">start_extract</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">extract_mode</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># Start extracting this section</span>
+            <span class="k">elif</span> <span class="n">extract_mode</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">heading_level</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">heading_level</span> <span class="o">&lt;=</span> <span class="n">section_level</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+        <span class="k">if</span> <span class="n">extract_mode</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">markdown_only</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">cell</span><span class="o">.</span><span class="n">cell_type</span> <span class="o">==</span> <span class="s1">&#39;markdown&#39;</span><span class="p">:</span>
+                    <span class="n">extract_cells</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">extract_cells</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">extract_cells</span></div>
+
+
+
+<div class="viewcode-block" id="remove_section">
+<a class="viewcode-back" href="../../widgetify.html#widgetify.nb_op.remove_section">[docs]</a>
+<span class="k">def</span> <span class="nf">remove_section</span><span class="p">(</span><span class="n">nb_filename</span><span class="p">,</span> <span class="n">section_name</span><span class="p">,</span> <span class="n">markdown_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove a specific section and its content from a Jupyter Notebook.</span>
+
+<span class="sd">    This function removes a section and all its subsequent cells from the</span>
+<span class="sd">    notebook, starting from the specified section until it encounters a</span>
+<span class="sd">    heading of the same or higher level.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        nb_filename (str): The path to the Jupyter Notebook file.</span>
+<span class="sd">        section_name (str): The name of the section to remove, including the</span>
+<span class="sd">            heading level (e.g., &#39;## Section Name&#39;).</span>
+<span class="sd">        markdwn_only (bool, optional): If True, only markdown cells will be</span>
+<span class="sd">            considered for extraction. Defaults to False.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None: The function modifies the notebook in place and writes the</span>
+<span class="sd">        changes back to the file.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The section is identified by its exact heading (including the level</span>
+<span class="sd">        of &#39;#&#39;). Once a matching section is found, the removal will continue</span>
+<span class="sd">        until a markdown heading of the same or higher level is encountered.</span>
+<span class="sd">        The rest of the notebook content will remain unchanged.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Read the original notebook file</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">nb_filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">notebook</span> <span class="o">=</span> <span class="n">nbformat</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">as_version</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+    <span class="c1"># Calculate the section level from the section name</span>
+    <span class="n">section_level</span> <span class="o">=</span> <span class="n">section_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)</span>
+
+    <span class="n">new_cells</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">remove_mode</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">start_removal</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">notebook</span><span class="o">.</span><span class="n">cells</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cell</span><span class="o">.</span><span class="n">cell_type</span> <span class="o">==</span> <span class="s1">&#39;markdown&#39;</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+            <span class="c1"># Calculate the heading level of the current markdown cell</span>
+            <span class="n">heading_level</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span>
+                 <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)),</span>
+                <span class="kc">None</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Detect if the markdown cell matches the section to start removing</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">start_removal</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">section_name</span> <span class="ow">in</span> <span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">):</span>
+                    <span class="n">start_removal</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">remove_mode</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># Start removing this section</span>
+                    <span class="k">continue</span>
+
+            <span class="c1"># Stop removing when the markdown heading level is less than or</span>
+            <span class="c1"># equal to the section_level</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">remove_mode</span> <span class="ow">and</span> <span class="n">heading_level</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="ow">and</span> <span class="n">heading_level</span> <span class="o">&lt;=</span> <span class="n">section_level</span><span class="p">):</span>
+                <span class="n">remove_mode</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="n">remove_mode</span><span class="p">:</span>
+            <span class="c1"># Remove markdown cell only i.e., keep code cell and raw cell</span>
+            <span class="k">if</span> <span class="n">markdown_only</span> <span class="ow">and</span> <span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">cell_type</span> <span class="o">!=</span> <span class="s1">&#39;markdown&#39;</span><span class="p">):</span>
+                <span class="n">new_cells</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_cells</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+
+    <span class="c1"># Update the notebook with the remaining cells</span>
+    <span class="n">notebook</span><span class="o">.</span><span class="n">cells</span> <span class="o">=</span> <span class="n">new_cells</span>
+
+    <span class="c1"># Write the modified notebook to the output file</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">nb_filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">nbformat</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">notebook</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, York Jong.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
