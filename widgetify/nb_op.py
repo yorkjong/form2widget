@@ -1,5 +1,5 @@
 """
-Notebook Operations (nb_op)
+nb_op - Notebook Operations
 
 This module provides utilities for performing common operations on Jupyter
 Notebooks using `nbformat`, such as inserting titles, removing sections,
